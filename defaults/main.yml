@@ -3,3 +3,6 @@ notification_address: root@localhost
 notification_name: 'Default Email'
 notification_type: EMAIL
 keystone_project:
+
+# flag to track restart requirement during reconfigure
+monasca_default_alarms_restart_required: false
