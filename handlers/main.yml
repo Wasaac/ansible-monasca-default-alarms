@@ -1,0 +1,4 @@
+---
+- name: monasca_default_alarms_config_change
+  set_fact:
+    monasca_default_alarms_restart_required: true
