@@ -24,11 +24,11 @@ options:
     description:
         required: false
         description:
-            - The description associated with the alarm
+            - The description associated with the alarm definition
     expression:
         required: false
         description:
-            - The alarm expression, required for create/update operations.
+            - The alarm definition expression, required for create/update operations.
     keystone_password:
         required: false
         description:
@@ -36,7 +36,7 @@ options:
     keystone_url:
         required: false
         description:
-            - Keystone url to authenticate against, required unless keystone_token isdefined.
+            - Keystone url to authenticate against, required unless keystone_token is defined.
               Example http://192.168.10.5:5000/v3
     keystone_token:
         required: false
@@ -59,7 +59,7 @@ options:
     monasca_api_url:
         required: false
         description:
-            - If unset the service endpoing registered with keystone will be used.
+            - If unset the service endpoint registered with keystone will be used.
     name:
         required: true
         description:
@@ -72,13 +72,14 @@ options:
         required: false
         default: "LOW"
         description:
-            - The severity set for the alarm must be LOW, MEDIUM, HIGH or CRITICAL
+            - The severity set for the alarm definition must be LOW, MEDIUM, HIGH or CRITICAL
     state:
         required: false
         default: "present"
         choices: [ present, absent ]
         description:
-            - Whether the account should exist.  When C(absent), removes the user account.
+            - Whether the alarm definition should exist.  When C(absent), removes the alarm definition. The name
+              is used to determine the alarm definition to remove
     undetermined_actions:
         required: false
         description:
