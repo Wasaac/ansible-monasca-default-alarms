@@ -1,15 +1,29 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
+- name: Install monasca-client into a Python virtualenv
+  pip:
+    name: python-monascaclient
+    state: present
+    version: 1.15.0
+    virtualenv: "{{ monasca_client_virtualenv_dir }}"
+  become: yes
+
 - name: Setup default notification method
+  vars:
+    ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
   monasca_notification_method:
-    name: "{{notification_name}}"
-    type: "{{notification_type}}"
-    address: "{{notification_address}}"
-    keystone_url: "{{keystone_url}}"
-    keystone_user: "{{keystone_user}}"
-    keystone_password: "{{keystone_password}}"
-    keystone_project: "{{keystone_project}}"
+    name: "{{ notification_name }}"
+    type: "{{ notification_type }}"
+    address: "{{ notification_address }}"
+    keystone_url: "{{ keystone_url | default(omit) }}"
+    keystone_user: "{{ keystone_user | default(omit) }}"
+    keystone_password: "{{ keystone_password | default(omit) }}"
+    keystone_project: "{{ keystone_project | default(omit) }}"
+    keystone_token: "{{ keystone_token | default(omit) }}"
+    monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    state: "{{ state | default(omit) }}"
+  when: no_notification is not defined
   tags:
     - system_alarms
     - monasca_alarms
@@ -18,7 +32,22 @@
   register: default_notification
 
 # Include the various alarm sets
-- include: system.yml tags=system_alarms
-- include: monasca.yml tags=monasca_alarms
-- include: openstack.yml tags=openstack_alarms
-- include: misc_services.yml tags=service_alarms
+- import_tasks: system.yml
+  when: no_system is not defined
+  tags: system_alarms
+
+- import_tasks: monasca.yml
+  when: no_monasca is not defined
+  tags: monasca_alarms
+
+- import_tasks: openstack.yml
+  when: no_openstack is not defined
+  tags: openstack_alarms
+
+- import_tasks: misc_services.yml
+  when: no_misc is not defined
+  tags: service_alarms
+
+- import_tasks: custom.yml
+  when: no_custom is not defined
+  tags: custom_alarms

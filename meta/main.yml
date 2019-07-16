@@ -1,10 +1,12 @@
 ---
 galaxy_info:
-  author: Tim Kuhlman
+  author:
+  - Isaac Prior
+  - Tim Kuhlman
   description: Sets up default alarm definitions for Monasca
-  company: HP
+  company: StackHPC
   license: Apache
-  min_ansible_version: 1.7
+  min_ansible_version: 2.8
   platforms:
   - name: GenericLinux
     versions:

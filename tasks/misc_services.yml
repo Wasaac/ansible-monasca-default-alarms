@@ -2,20 +2,27 @@
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
 - name: Alarms for various common services
+  vars:
+    ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
   monasca_alarm_definition:
-    name: "{{item.name}}"
-    description: "{{item.description | default('') }}"
-    expression: "{{item.expression}}"
-    keystone_token: "{{default_notification.keystone_token}}"
-    match_by: "{{item.match_by | default(['hostname']) }}"
-    monasca_api_url: "{{default_notification.monasca_api_url}}"
-    severity: "{{item.severity | default('LOW') }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default('') }}"
+    expression: "{{ item.expression }}"
+    keystone_url: "{{ keystone_url | default(omit) }}"
+    keystone_user: "{{ keystone_user | default(omit) }}"
+    keystone_password: "{{ keystone_password | default(omit) }}"
+    keystone_project: "{{ keystone_project | default(omit) }}"
+    keystone_token: "{{ keystone_token | default(omit) }}"
+    monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    match_by: "{{ item.match_by | default(['hostname']) }}"
+    severity: "{{ item.severity | default('LOW') }}"
+    state: "{{ state | default(omit) }}"
     alarm_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
     ok_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
     undetermined_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
   with_items:
     - { name: "RabbitMQ Queue Depth",
         description: "Alarms when the depth of the message queue is high",
@@ -33,4 +40,6 @@
         description: "Alarms when there are no idle workers in the Apache server",
         expression: "avg(apache.performance.idle_worker_count) < 1 times 3",
         severity: "MEDIUM"}
-    - { name: "NTP Time Sync", description: "Alarms when the NTP time offset is high", expression: "ntp.offset > 5 or ntp.offset < -5"}
+    - { name: "NTP Time Sync",
+        description: "Alarms when the NTP time offset is high",
+        expression: "ntp.offset > 5 or ntp.offset < -5"}

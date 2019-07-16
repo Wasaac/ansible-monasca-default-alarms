@@ -2,28 +2,55 @@
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
 - name: Create System Alarm Definitions
+  vars:
+    ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
   monasca_alarm_definition:
-    name: "{{item.name}}"
-    description: "{{item.description | default('') }}"
-    expression: "{{item.expression}}"
-    keystone_token: "{{default_notification.keystone_token}}"
-    match_by: "{{item.match_by | default(['hostname']) }}"
-    monasca_api_url: "{{default_notification.monasca_api_url}}"
-    severity: "{{item.severity | default('LOW') }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default('') }}"
+    expression: "{{ item.expression }}"
+    match_by: "{{ item.match_by | default(['hostname']) }}"
+    keystone_url: "{{ keystone_url | default(omit) }}"
+    keystone_user: "{{ keystone_user | default(omit) }}"
+    keystone_password: "{{ keystone_password | default(omit) }}"
+    keystone_project: "{{ keystone_project | default(omit) }}"
+    keystone_token: "{{ keystone_token | default(omit) }}"
+    monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    severity: "{{ item.severity | default('LOW') }}"
+    state: "{{ state | default(omit) }}"
     alarm_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
     ok_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
     undetermined_actions:
-      - "{{default_notification.notification_method_id}}"
+      - "{{ default_notification.notification_method_id | default(omit) }}"
   with_items:
-    - { name: "Host Status", description: "Alarms when the specified host is down or not reachable", severity: "HIGH", expression: "host_alive_status > 0" }
-    - { name: "HTTP Status", description: "Alarms when the specified HTTP endpoint is down or not reachable", severity: "HIGH", expression: "http_status > 0", match_by: ["service", "component", "hostname", "url"] }
-    - { name: "CPU Usage", description: "Alarms when CPU usage is high", expression: "avg(cpu.idle_perc) < 10 times 3" }
-    - { name: "Disk Inode Usage", description: "Alarms when disk inode usage is high", expression: "disk.inode_used_perc > 90", match_by: ["hostname", "device"] }
-    - { name: "Disk Usage", description: "Alarms when disk usage is high", expression: "disk.space_used_perc > 90", match_by: ["hostname", "device"] }
-    - { name: "Memory Usage", description: "Alarms when memory usage is high", severity: "MEDIUM", expression: "avg(mem.usable_perc) < 10 times 3" }
-    - { name: "Kernel Crash Dumps", description: "Kernel crash dumps are available on disk", expression: "crash.dump_count > 1" }
+    - { name: "Host Status",
+        description: "Alarms when the specified host is down or not reachable",
+        severity: "HIGH",
+        expression: "host_alive_status > 0" }
+    - { name: "HTTP Status",
+        description: "Alarms when the specified HTTP endpoint is down or not reachable",
+        severity: "HIGH",
+        expression: "http_status > 0",
+        match_by: ["service", "component", "hostname", "url"] }
+    - { name: "CPU Usage",
+        description: "Alarms when CPU usage is high",
+        expression: "avg(cpu.idle_perc) < 10 times 3" }
+    - { name: "Disk Inode Usage",
+        description: "Alarms when disk inode usage is high",
+        expression: "disk.inode_used_perc > 90",
+        match_by: ["hostname", "device"] }
+    - { name: "Disk Usage",
+        description: "Alarms when disk usage is high",
+        expression: "disk.space_used_perc > 90",
+        match_by: ["hostname", "device"] }
+    - { name: "Memory Usage",
+        description: "Alarms when memory usage is high",
+        severity: "MEDIUM",
+        expression: "avg(mem.usable_perc) < 10 times 3" }
+    - { name: "Kernel Crash Dumps",
+        description: "Kernel crash dumps are available on disk",
+        expression: "crash.dump_count > 1" }
     - { name: "Network Errors",
         description: "Alarms when either incoming or outgoing network errors are high",
         severity: "MEDIUM", expression: "net.in_errors_sec > 5 or net.out_errors_sec > 5" }

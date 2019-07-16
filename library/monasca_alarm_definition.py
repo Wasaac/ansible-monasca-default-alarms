@@ -1,175 +1,97 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# (C) Copyright 2019 StackHPC Ltd.
 # (C) Copyright 2015 Hewlett-Packard Development Company, L.P.
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
 module: monasca_alarm_definition
-short_description: crud operations on Monasca alarm definitions
+short_description: Perform crud operations on Monasca alarm definitions
 description:
-    - Performs crud operations (create/update/delete) on monasca alarm definitions
-    - Monasca project homepage - https://wiki.openstack.org/wiki/Monasca
-    - When relevant the alarm_definition_id is in the output and can be used with the register action
-author: Tim Kuhlman <tim@backgroundprocess.com>
-requirements: [ python-monascaclient ]
+    - "Performs crud operations (create/update/delete) on monasca alarm definitions"
+    - "The Monasca project homepage: U(https://wiki.openstack.org/wiki/Monasca)."
+    - "When relevant the alarm_definition_id is in the output and can be used with the register action"
+author:
+    - Tim Kuhlman <tim@backgroundprocess.com>
+    - Isaac Prior <isaac@stackhpc.com>
+requirements: [ python-monascaclient , keystoneauth1 ]
 options:
     alarm_actions:
-        required: false
         description:
             -  Array of notification method IDs that are invoked for the transition to the ALARM state.
-    api_version:
-        required: false
-        default: '2_0'
-        description:
-            - The monasca api version.
     description:
-        required: false
         description:
-            - The description associated with the alarm definition
+            - The description associated with the alarm definition.
     expression:
-        required: false
         description:
             - The alarm definition expression, required for create/update operations.
-    keystone_password:
-        required: false
-        description:
-            - Keystone password to use for authentication, required unless a keystone_token is specified.
-    keystone_url:
-        required: false
-        description:
-            - Keystone url to authenticate against, required unless keystone_token is defined.
-              Example http://192.168.10.5:5000/v3
-    keystone_token:
-        required: false
-        description:
-            - Keystone token to use with the monasca api. If this is specified the monasca_api_url is required but
-              the keystone_user and keystone_password aren't.
-    keystone_user:
-        required: false
-        description:
-            - Keystone user to log in as, required unless a keystone_token is specified.
-    keystone_project:
-        required: false
-        description:
-            - Keystone project name to obtain a token for, defaults to the user's default project
     match_by:
-        required: false
         default: "[hostname]"
         description:
             - Alarm definition match by, see the monasca api documentation for more detail.
-    monasca_api_url:
-        required: false
-        description:
-            - If unset the service endpoint registered with keystone will be used.
     name:
         required: true
         description:
-            - The alarm definition name
+            - The alarm definition name.
     ok_actions:
-        required: false
         description:
             -  Array of notification method IDs that are invoked for the transition to the OK state.
     severity:
-        required: false
         default: "LOW"
         description:
-            - The severity set for the alarm definition must be LOW, MEDIUM, HIGH or CRITICAL
+            - The severity set for the alarm definition must be LOW, MEDIUM, HIGH or CRITICAL.
     state:
-        required: false
         default: "present"
         choices: [ present, absent ]
         description:
             - Whether the alarm definition should exist.  When C(absent), removes the alarm definition. The name
-              is used to determine the alarm definition to remove
+              is used to determine the alarm definition to remove.
     undetermined_actions:
-        required: false
         description:
             -  Array of notification method IDs that are invoked for the transition to the UNDETERMINED state.
+extends_documentation_fragment: monasca
 '''
 
 EXAMPLES = '''
-- name: Host Alive Alarm
-  monasca_alarm_definition:
-    name: "Host Alive Alarm"
-    expression: "host_alive_status > 0"
-    keystone_url: "{{keystone_url}}"
-    keystone_user: "{{keystone_user}}"
-    keystone_password: "{{keystone_password}}"
-  tags:
-    - alarms
-    - system_alarms
-  register: out
+- name: Setup root email notification method
+  monasca_notification_method:
+    name: "Email Root"
+    type: 'EMAIL'
+    address: 'root@localhost'
+    keystone_url: "{{ keystone_url }}"
+    keystone_user: "{{ keystone_user }}"
+    keystone_password: "{{ keystone_password }}"
+    keystone_project: "{{ keystone_project }}"
+  register: default_notification
 - name: Create System Alarm Definitions
   monasca_alarm_definition:
-    name: "{{item.name}}"
-    expression: "{{item.expression}}"
-    keystone_token: "{{out.keystone_token}}"
-    monasca_api_url: "{{out.monasca_api_url}}"
+    name: "{{ item.name }}"
+    expression: "{{ item.expression }}"
+    keystone_url: "{{ keystone_url }}"
+    keystone_user: "{{ keystone_user }}"
+    keystone_password: "{{ keystone_password }}"
+    keystone_project: "{{ keystone_project }}"
+    alarm_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
+    ok_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
+    undetermined_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
   with_items:
     - { name: "High CPU usage", expression: "avg(cpu.idle_perc) < 10 times 3" }
     - { name: "Disk Inode Usage", expression: "disk.inode_used_perc > 90" }
 '''
 
-from ansible.module_utils.basic import *
-import os
-
-try:
-    from monascaclient import client
-    from monascaclient import ksclient
-except ImportError:
-    # In many installs the python-monascaclient is available in a venv, switch to the most common location
-    activate_this = os.path.realpath('/opt/monasca/bin/activate_this.py')
-    try:
-        execfile(activate_this, dict(__file__=activate_this))
-        from monascaclient import client
-        from monascaclient import ksclient
-    except ImportError:
-        monascaclient_found = False
-    else:
-        monascaclient_found = True
-else:
-    monascaclient_found = True
-
-
-# With Ansible modules including other files presents difficulties otherwise this would be in its own module
-class MonascaAnsible(object):
-    """ A base class used to build Monasca Client based Ansible Modules
-        As input an ansible.module_utils.basic.AnsibleModule object is expected. It should have at least
-        these params defined:
-        - api_version
-        - keystone_token and monasca_api_url or keystone_url, keystone_user and keystone_password and optionally
-          monasca_api_url
-    """
-    def __init__(self, module):
-        self.module = module
-        self._keystone_auth()
-        self.exit_data = {'keystone_token': self.token, 'monasca_api_url': self.api_url}
-        self.monasca = client.Client(self.module.params['api_version'], self.api_url, token=self.token)
-
-    def _exit_json(self, **kwargs):
-        """ Exit with supplied kwargs combined with the self.exit_data
-        """
-        kwargs.update(self.exit_data)
-        self.module.exit_json(**kwargs)
-
-    def _keystone_auth(self):
-        """ Authenticate to Keystone and set self.token and self.api_url
-        """
-        if self.module.params['keystone_token'] is None:
-            ks = ksclient.KSClient(auth_url=self.module.params['keystone_url'],
-                                   username=self.module.params['keystone_user'],
-                                   password=self.module.params['keystone_password'],
-                                   project_name=self.module.params['keystone_project'])
-
-            self.token = ks.token
-            if self.module.params['monasca_api_url'] is None:
-                self.api_url = ks.monasca_url
-            else:
-                self.api_url = self.module.params['monasca_api_url']
-        else:
-            if self.module.params['monasca_api_url'] is None:
-                self.module.fail_json(msg='Error: When specifying keystone_token, monasca_api_url is required')
-            self.token = self.module.params['keystone_token']
-            self.api_url = self.module.params['monasca_api_url']
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.monasca import MonascaAnsible, argument_spec, mutually_exclusive
 
 
 class MonascaDefinition(MonascaAnsible):
@@ -191,6 +113,7 @@ class MonascaDefinition(MonascaAnsible):
                 self._exit_json(changed=True)
             else:
                 self.module.fail_json(msg=str(resp.status_code) + resp.text)
+
         else:  # Only other option is state=present
             def_kwargs = {"name": name, "description": self.module.params['description'], "expression": expression,
                           "match_by": self.module.params['match_by'], "severity": self.module.params['severity'],
@@ -221,30 +144,25 @@ class MonascaDefinition(MonascaAnsible):
 
 
 def main():
-    module = AnsibleModule(
-        argument_spec=dict(
+    arg_spec = argument_spec()
+    arg_spec.update(
+        dict(
             alarm_actions=dict(required=False, default=[], type='list'),
-            api_version=dict(required=False, default='2_0', type='str'),
             description=dict(required=False, type='str'),
             expression=dict(required=False, type='str'),
-            keystone_password=dict(required=False, type='str'),
-            keystone_token=dict(required=False, type='str'),
-            keystone_url=dict(required=False, type='str'),
-            keystone_user=dict(required=False, type='str'),
-            keystone_project=dict(required=False, type='str'),
             match_by=dict(default=['hostname'], type='list'),
-            monasca_api_url=dict(required=False, type='str'),
             name=dict(required=True, type='str'),
             ok_actions=dict(required=False, default=[], type='list'),
             severity=dict(default='LOW', type='str'),
             state=dict(default='present', choices=['present', 'absent'], type='str'),
-            undetermined_actions=dict(required=False, default=[], type='list')
-        ),
+            undetermined_actions=dict(required=False, default=[], type='list'),
+        )
+    )
+    module = AnsibleModule(
+        argument_spec=arg_spec,
+        mutually_exclusive=mutually_exclusive(),
         supports_check_mode=True
     )
-
-    if not monascaclient_found:
-        module.fail_json(msg="python-monascaclient >= 1.0.9 is required")
 
     definition = MonascaDefinition(module)
     definition.run()

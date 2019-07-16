@@ -1,7 +1,7 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
-- name: OpenStack Alarm definitions
+- name: Custom Alarm definitions
   vars:
     ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
   monasca_alarm_definition:
@@ -23,8 +23,4 @@
       - "{{ default_notification.notification_method_id | default(omit) }}"
     undetermined_actions:
       - "{{ default_notification.notification_method_id | default(omit) }}"
-  with_items:
-    - { name: "Instance CPU Usage",
-        description: "Alarms when the CPU usage of the specified instance is high",
-        expression: "avg(cpu.utilization_perc) > 90 times 3",
-        match_by: [resource_id] }
+  with_items: "{{ custom_alarms }}"

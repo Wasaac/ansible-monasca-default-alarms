@@ -4,4 +4,4 @@
 notification_address: root@localhost
 notification_name: 'Default Email'
 notification_type: EMAIL
-keystone_project:
+monasca_client_virtualenv_dir: /opt/python-monascaclient
