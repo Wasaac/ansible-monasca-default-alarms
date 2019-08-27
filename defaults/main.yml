@@ -5,3 +5,6 @@ notification_address: root@localhost
 notification_name: 'Default Email'
 notification_type: EMAIL
 monasca_client_virtualenv_dir: /opt/python-monascaclient
+virtualenv_become: 'yes'
+skip_tasks: []
+custom_alarms: {}
