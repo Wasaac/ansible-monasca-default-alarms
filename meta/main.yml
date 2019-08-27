@@ -17,6 +17,8 @@ galaxy_info:
   - name: Debian
     versions:
     - jessie
-  categories:
-  - monitoring
+  galaxy_tags:
+    - openstack
+    - monasca
+    - monitoring
 dependencies: []
