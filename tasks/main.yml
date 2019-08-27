@@ -7,7 +7,10 @@
     state: present
     version: 1.15.0
     virtualenv: "{{ monasca_client_virtualenv_dir }}"
-  become: yes
+  become: "{{ virtualenv_become }}"
+  when: "'venv' not in skip_tasks"
+  tags:
+    - venv
 
 - name: Setup default notification method
   vars:
@@ -23,7 +26,7 @@
     keystone_token: "{{ keystone_token | default(omit) }}"
     monasca_api_url: "{{ monasca_api_url | default(omit) }}"
     state: "{{ state | default(omit) }}"
-  when: no_notification is not defined
+  when: "'notification' not in skip_tasks"
   tags:
     - system_alarms
     - monasca_alarms
@@ -33,21 +36,21 @@
 
 # Include the various alarm sets
 - import_tasks: system.yml
-  when: no_system is not defined
+  when: "'system' not in skip_tasks"
   tags: system_alarms
 
 - import_tasks: monasca.yml
-  when: no_monasca is not defined
+  when: "'monasca' not in skip_tasks"
   tags: monasca_alarms
 
 - import_tasks: openstack.yml
-  when: no_openstack is not defined
+  when: "'openstack' not in skip_tasks"
   tags: openstack_alarms
 
 - import_tasks: misc_services.yml
-  when: no_misc is not defined
+  when: "'misc' not in skip_tasks"
   tags: service_alarms
 
 - import_tasks: custom.yml
-  when: no_custom is not defined
+  when: "'custom' not in skip_tasks"
   tags: custom_alarms

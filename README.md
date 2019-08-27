@@ -26,10 +26,30 @@ or
 - `keystone_token`
 - `monasca_api_url`
 
-By default the configured alarm definitions will be setup with a notification to `root@localhost`. Change the
-`default_email` variable to modify.
+By default the configured alarm definitions will be setup with an email notification to `root@localhost`.
+Change the `notification_address` variable to send email elsewhere.
+Alternatively, if `notification_type` is `WEBHOOK` or `SLACK` then `notification_address` specifies the URL:
+
+    notification_address: "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZ"
+    notification_name: "Default Slack Notification"
+    notification_type: "SLACK"
+
+In addition, there are two optional variables to control the alarms created:
+
+- `skip_tasks` (list)
+- `custom_alarms` (dict)
+
+See example playbook for `custom_alarms` fields. See `tasks/main.yml` for `skip_tasks` options.
+
+The role is responsible for installing the python-monascaclient dependency inside a virtualenv.
+The default location of the virtualenv is `/opt/python-monascaclient` - since this path usually
+requires privilege escalation the role will use `become: yes` to create it.
+Change the virtualenv directory using `monasca_client_virtualenv_dir: /foo`.
+Disable privilege escalation using `virtualenv_become: no`.
 
 ## Example Playbook
+Place the following in a playbook file, replacing the `keystone_` variables with those suitable for
+your OpenStack deployment. Consider using ansible-vault or equivalent to store `keystone_password`.
 
     - name: Define default alarm notifications
       hosts: monitoring
@@ -39,13 +59,14 @@ By default the configured alarm definitions will be setup with a notification to
         keystone_user: admin
         keystone_password: password
         keystone_project: monasca_control_plane
+        skip_tasks: ["misc", "openstack", "monasca"]
         custom_alarms:
           - name: "Host CPU System Percent"
             description: "Alarms when System CPU % is higher than 80 (example custom alarm)"
             expression: "cpu.system_perc{hostname=host.domain.com} > 80"
             match_by: ['hostname']
       roles:
-        - {role: ansible-monasca-default-alarms, tags: [alarms]}
+        - {role: stackhpc.monasca_default_alarms, tags: [alarms]}
 
 ## Monasca Modules Usage
 There are two modules available in the library subdirectory, one for Monasca notifications and the other for
