@@ -25,6 +25,8 @@
     keystone_project: "{{ keystone_project | default(omit) }}"
     keystone_token: "{{ keystone_token | default(omit) }}"
     monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    monasca_endpoint_region: "{{ monasca_endpoint_region | default(omit) }}"
+    monasca_endpoint_interface: "{{ monasca_endpoint_interface | default(omit) }}"
     state: "{{ state | default(omit) }}"
   when: "'notification' not in skip_tasks"
   tags:

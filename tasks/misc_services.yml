@@ -14,6 +14,8 @@
     keystone_project: "{{ keystone_project | default(omit) }}"
     keystone_token: "{{ keystone_token | default(omit) }}"
     monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    monasca_endpoint_region: "{{ monasca_endpoint_region | default(omit) }}"
+    monasca_endpoint_interface: "{{ monasca_endpoint_interface | default(omit) }}"
     match_by: "{{ item.match_by | default(['hostname']) }}"
     severity: "{{ item.severity | default('LOW') }}"
     state: "{{ state | default(omit) }}"
