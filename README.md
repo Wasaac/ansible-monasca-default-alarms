@@ -11,15 +11,16 @@ Unless provided with `monasca_api_url` it is assumed the service endpoint for Mo
 
 ## Role Variables
 
-These variables must be defined.
+These variables must be defined. If an equivalent `OS_ENV` environment variable is defined on the control host it will be
+used with precedence equal to a default.
 
-- `keystone_url`
-- `keystone_project`
+- `keystone_url` (`OS_AUTH_URL`)
+- `keystone_project` (`OS_PROJECT_NAME`)
 
 and either
 
-- `keystone_user`
-- `keystone_password`
+- `keystone_user` (`OS_USERNAME`)
+- `keystone_password` (`OS_PASSWORD`)
 
 or
 

@@ -6,5 +6,9 @@ notification_name: 'Default Email'
 notification_type: EMAIL
 monasca_client_virtualenv_dir: /opt/python-monascaclient
 virtualenv_become: 'yes'
+keystone_url: "{{ lookup('env','OS_AUTH_URL') or omit }}"
+keystone_user: "{{ lookup('env','OS_USERNAME') or omit }}"
+keystone_password: "{{ lookup('env','OS_PASSWORD') or omit }}"
+keystone_project: "{{ lookup('env','OS_PROJECT_NAME') or omit }}"
 skip_tasks: []
 custom_alarms: {}
