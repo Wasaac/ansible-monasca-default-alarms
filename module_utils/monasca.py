@@ -65,8 +65,6 @@ options:
             - The monasca api interface. Used to discover the endpoint if I(monasca_api_url) is not provided.
 '''
 
-from ansible.module_utils.basic import missing_required_lib
-
 try:
     from monascaclient import client as mon_client
     from keystoneauth1 import identity
@@ -89,7 +87,7 @@ class MonascaAnsible(object):
         self.module = module
 
         if not HAS_MONASCACLIENT:
-            self.module.fail_json(msg=missing_required_lib('python-monascaclient or keystoneauth1'))
+            self.module.fail_json(msg='Failed to import python-monascaclient or keystoneauth1')
 
         self.api_version = self.module.params['api_version']
 
