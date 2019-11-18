@@ -97,6 +97,8 @@ class MonascaAnsible(object):
 
             if self.module.params['monasca_api_url'] is None:
                 self.api_url = self._endpoint_discover(sess)
+            else:
+                self.api_url = self.module.params['monasca_api_url']
 
             self.exit_data = {'monasca_api_url': self.api_url}
 
