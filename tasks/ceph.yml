@@ -1,0 +1,40 @@
+---
+# ©Copyright 2015 Hewlett-Packard Development Company, L.P.
+
+- name: Create Ceph Alarm Definitions
+  vars:
+    ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
+  monasca_alarm_definition:
+    name: "{{ item.name }}"
+    description: "{{ item.description | default('') }}"
+    expression: "{{ item.expression }}"
+    match_by: "{{ item.match_by | default(['hostname']) }}"
+    keystone_url: "{{ keystone_url | default(omit) }}"
+    keystone_user: "{{ keystone_user | default(omit) }}"
+    keystone_password: "{{ keystone_password | default(omit) }}"
+    keystone_project: "{{ keystone_project | default(omit) }}"
+    keystone_token: "{{ keystone_token | default(omit) }}"
+    monasca_api_url: "{{ monasca_api_url | default(omit) }}"
+    monasca_endpoint_region: "{{ monasca_endpoint_region | default(omit) }}"
+    monasca_endpoint_interface: "{{ monasca_endpoint_interface | default(omit) }}"
+    severity: "{{ item.severity | default('LOW') }}"
+    state: "{{ state | default(omit) }}"
+    alarm_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
+    ok_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
+    undetermined_actions:
+      - "{{ default_notification.notification_method_id | default(omit) }}"
+  with_items:
+    - { name: "Ceph Health Status Warn",
+        description: "Alarms when the Ceph health status is WARN (1)",
+        expression: "max(ceph_health_status) > 0 and max(ceph_health_status) <=1",
+        severity: "MEDIUM" }
+    - { name: "Ceph Health Status Error",
+        description: "Alarms when the Ceph health status is ERROR (2)",
+        expression: "max(ceph_health_status) > 1 and max(ceph_health_status) <=2",
+        severity: "HIGH" }
+    - { name: "Ceph Cluster Usage above 75 percent",
+        description: "Alarms when a Ceph Cluster Usage is > 75%",
+        expression: "avg(ceph_cluster_usage, 600) > 0.75 times 3",
+        severity: "MEDIUM" }

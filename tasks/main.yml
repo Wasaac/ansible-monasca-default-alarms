@@ -53,6 +53,10 @@
   when: "'misc' not in skip_tasks"
   tags: service_alarms
 
+- import_tasks: ceph.yml
+  when: "'ceph' not in skip_tasks"
+  tags: ceph_alarms
+
 - import_tasks: custom.yml
   when: "'custom' not in skip_tasks"
   tags: custom_alarms
