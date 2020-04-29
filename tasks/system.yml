@@ -30,34 +30,25 @@
         description: "Alarms when the specified host is down or not reachable",
         severity: "HIGH",
         expression: "host_alive_status > 0" }
-    - { name: "HTTP Status",
-        description: "Alarms when the specified HTTP endpoint is down or not reachable",
-        severity: "HIGH",
-        expression: "http_status > 0",
-        match_by: ["service", "component", "hostname", "url"] }
     - { name: "CPU Usage",
         description: "Alarms when CPU usage is high",
+        severity: "MEDIUM",
         expression: "avg(cpu.idle_perc) < 10 times 3" }
     - { name: "Disk Inode Usage",
         description: "Alarms when disk inode usage is high",
+        severity: "MEDIUM",
         expression: "disk.inode_used_perc > 90",
         match_by: ["hostname", "device"] }
     - { name: "Disk Usage",
         description: "Alarms when disk usage is high",
+        severity: "MEDIUM",
         expression: "disk.space_used_perc > 90",
         match_by: ["hostname", "device"] }
     - { name: "Memory Usage",
         description: "Alarms when memory usage is high",
         severity: "MEDIUM",
         expression: "avg(mem.usable_perc) < 10 times 3" }
-    - { name: "Kernel Crash Dumps",
-        description: "Kernel crash dumps are available on disk",
-        expression: "crash.dump_count > 1" }
     - { name: "Network Errors",
         description: "Alarms when either incoming or outgoing network errors are high",
-        severity: "MEDIUM", expression: "net.in_errors_sec > 5 or net.out_errors_sec > 5" }
-    - { name: "Process Check",
-        description: "Alarms when the specified process is not running",
-        severity: "HIGH",
-        expression: "process.pid_count < 1",
-        match_by: ["process_name", "hostname"] }
+        severity: "MEDIUM",
+        expression: "net.in_errors_sec > 5 or net.out_errors_sec > 5" }
