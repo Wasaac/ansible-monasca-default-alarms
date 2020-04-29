@@ -60,7 +60,7 @@ your OpenStack deployment. Consider using ansible-vault or equivalent to store `
         keystone_user: admin
         keystone_password: password
         keystone_project: monasca_control_plane
-        skip_tasks: ["misc", "openstack", "monasca"]
+        skip_tasks: ["misc", "openstack", "monasca", "ceph"]
         custom_alarms:
           - name: "Host CPU System Percent"
             description: "Alarms when System CPU % is higher than 80 (example custom alarm)"
