@@ -26,22 +26,35 @@
     undetermined_actions:
       - "{{ default_notification.notification_method_id | default(omit) }}"
   with_items:
+    - { name: "HTTP Status",
+        description: "Alarms when the specified HTTP endpoint is down or not reachable",
+        severity: "HIGH",
+        expression: "http_status > 0",
+        match_by: ["service", "component", "hostname", "url"] }
+    - { name: "Process Check",
+        description: "Alarms when the specified process is not running",
+        severity: "HIGH",
+        expression: "process.pid_count < 1",
+        match_by: ["process_name", "hostname"] }
+    - { name: "Kernel Crash Dumps",
+        description: "Kernel crash dumps are available on disk",
+        expression: "crash.dump_count > 1" }
     - { name: "RabbitMQ Queue Depth",
         description: "Alarms when the depth of the message queue is high",
         expression: "avg(rabbitmq.queue.messages) > 10 times 3",
         severity: "MEDIUM",
-        match_by: [queue, hostname]}
+        match_by: ["queue", "hostname"] }
     - { name: "MySQL Slow Query Rate",
         description: "Alarms when the slow query rate is high",
-        expression: "avg(mysql.performance.slow_queries) > 10 times 3"}
+        expression: "avg(mysql.performance.slow_queries) > 10 times 3" }
     - { name: "Apache Status",
         description: "Alarms on failure to reach the Apache status endpoint",
         expression: "apache.status > 0",
-        severity: "HIGH"}
+        severity: "HIGH" }
     - { name: "Apache Idle Worker Count",
         description: "Alarms when there are no idle workers in the Apache server",
         expression: "avg(apache.performance.idle_worker_count) < 1 times 3",
-        severity: "MEDIUM"}
+        severity: "MEDIUM" }
     - { name: "NTP Time Sync",
         description: "Alarms when the NTP time offset is high",
-        expression: "ntp.offset > 5 or ntp.offset < -5"}
+        expression: "ntp.offset > 5 or ntp.offset < -5" }
