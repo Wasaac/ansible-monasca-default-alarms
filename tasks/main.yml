@@ -30,10 +30,13 @@
     state: "{{ state | default(omit) }}"
   when: "'notification' not in skip_tasks"
   tags:
+    - notification
     - system_alarms
     - monasca_alarms
     - openstack_alarms
     - service_alarms
+    - ceph_alarms
+    - custom_alarms
   register: default_notification
 
 # Include the various alarm sets
