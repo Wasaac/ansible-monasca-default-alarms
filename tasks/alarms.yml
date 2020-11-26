@@ -1,7 +1,5 @@
 ---
-# ©Copyright 2015 Hewlett-Packard Development Company, L.P.
-
-- name: Create Ceph Alarm Definitions
+- name: "{{ alarm_group }} Alarm Definitions"
   vars:
     ansible_python_interpreter: "{{ monasca_client_virtualenv_dir }}/bin/python"
   monasca_alarm_definition:
@@ -25,16 +23,4 @@
       - "{{ default_notification.notification_method_id | default(omit) }}"
     undetermined_actions:
       - "{{ default_notification.notification_method_id | default(omit) }}"
-  with_items:
-    - { name: "Ceph Health Status Warn",
-        description: "Alarms when the Ceph health status is WARN (1)",
-        expression: "max(ceph_health_status) > 0 and max(ceph_health_status) <=1",
-        severity: "MEDIUM" }
-    - { name: "Ceph Health Status Error",
-        description: "Alarms when the Ceph health status is ERROR (2)",
-        expression: "max(ceph_health_status) > 1 and max(ceph_health_status) <=2",
-        severity: "HIGH" }
-    - { name: "Ceph Cluster Usage above 75 percent",
-        description: "Alarms when a Ceph Cluster Usage is > 75%",
-        expression: "avg(ceph_cluster_usage, 600) > 0.75 times 3",
-        severity: "MEDIUM" }
+  with_items: "{{ alarm_definitions }}"
