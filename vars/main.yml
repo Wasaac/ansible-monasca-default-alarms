@@ -1,4 +1,7 @@
 ---
+# ©Copyright 2020 StackHPC Ltd.
+# ©Copyright 2015 Hewlett-Packard Development Company, L.P.
+
 system_alarm_definitions:
   - name: "Host Status"
     description: "Alarms when the specified host is down or not reachable"

@@ -1,4 +1,7 @@
 ---
+# ©Copyright 2020 StackHPC Ltd.
+# ©Copyright 2015 Hewlett-Packard Development Company, L.P.
+
 - name: Install monasca-client into a Python virtualenv
   pip:
     name: python-monascaclient
