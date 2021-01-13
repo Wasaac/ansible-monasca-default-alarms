@@ -1,4 +1,5 @@
 ---
+# ©Copyright 2020 StackHPC Ltd.
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
 - name: Install monasca-client into a Python virtualenv
@@ -30,33 +31,69 @@
     state: "{{ state | default(omit) }}"
   when: "'notification' not in skip_tasks"
   tags:
-    - system_alarms
-    - monasca_alarms
-    - openstack_alarms
-    - service_alarms
+    - always
   register: default_notification
 
 # Include the various alarm sets
-- import_tasks: system.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "System"
+    alarm_definitions: "{{ system_alarm_definitions }}"
   when: "'system' not in skip_tasks"
   tags: system_alarms
 
-- import_tasks: monasca.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "Monasca"
+    alarm_definitions: "{{ monasca_alarm_definitions }}"
   when: "'monasca' not in skip_tasks"
   tags: monasca_alarms
 
-- import_tasks: openstack.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "OpenStack"
+    alarm_definitions: "{{ openstack_alarm_definitions }}"
   when: "'openstack' not in skip_tasks"
   tags: openstack_alarms
 
-- import_tasks: misc_services.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "Misc"
+    alarm_definitions: "{{ misc_alarm_definitions }}"
   when: "'misc' not in skip_tasks"
   tags: service_alarms
 
-- import_tasks: ceph.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "Ceph"
+    alarm_definitions: "{{ ceph_alarm_definitions }}"
   when: "'ceph' not in skip_tasks"
   tags: ceph_alarms
 
-- import_tasks: custom.yml
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "prometheus-haproxy-exporter"
+    alarm_definitions: "{{ prometheus_haproxy_alarm_definitions }}"
+  when: "'prometheus-haproxy' not in skip_tasks"
+  tags: prometheus_haproxy
+
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "prometheus-mysqld-exporter"
+    alarm_definitions: "{{ prometheus_mysqld_alarm_definitions }}"
+  when: "'prometheus-mysqld' not in skip_tasks"
+  tags: prometheus_mysqld
+
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "prometheus-openstack-exporter"
+    alarm_definitions: "{{ prometheus_openstack_alarm_definitions }}"
+  when: "'prometheus-openstack' not in skip_tasks"
+  tags: prometheus_openstack
+
+- include_tasks: alarms.yml
+  vars:
+    alarm_group: "Custom"
+    alarm_definitions: "{{ custom_alarms }}"
   when: "'custom' not in skip_tasks"
   tags: custom_alarms

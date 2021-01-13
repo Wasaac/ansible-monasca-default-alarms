@@ -1,8 +1,6 @@
 ---
 galaxy_info:
-  author:
-  - Isaac Prior
-  - Tim Kuhlman
+  author: "Isaac Prior"
   description: Sets up default alarm definitions for Monasca
   company: StackHPC
   license: Apache
